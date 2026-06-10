@@ -1,7 +1,5 @@
 package com.interview.client.Service;
 
-import com.interview.client.Dto.VerificationResponse;
-import com.interview.client.exception.VerificationFailedException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +13,8 @@ import com.interview.client.Dao.ClientDao;
 import com.interview.client.Dto.Client;
 import com.interview.client.Dto.PaginationResponse;
 import com.interview.client.Dto.ResponseStructure;
+import com.interview.client.Dto.VerificationResponse;
+import com.interview.client.exception.VerificationFailedException;
 
 @Service
 @Transactional
@@ -26,28 +26,25 @@ public class ClientService {
 	@Autowired
 	private VerificationClientService verificationClientService;
 
-	public ResponseStructure<Client> insertClient(Client client){
+	public ResponseStructure<Client> insertClient(Client client) {
 		ResponseStructure<Client> responseStructure = new ResponseStructure<Client>();
 
-
-		// Call 3rd party API (use mock API here) to perform verification prior insert client data to DB
+		// 1) Call 3rd party API (use mock API here) to perform verification prior insert client data to DB
 		VerificationResponse verificationResponse = verificationClientService.verifyClient(client);
 
 		if (verificationResponse == null) {
-			throw new RuntimeException(
-					"Verification service unavailable");
+			throw new RuntimeException("Verification service unavailable");
 		}
 
 		if (!"PASS".equalsIgnoreCase(verificationResponse.getStatus())) {
-//			throw new RuntimeException("Client verification failed. Risk Level: " + verificationResponse.getRiskLevel());
-			throw new VerificationFailedException(verificationResponse.getMessage());
+			throw new VerificationFailedException(verificationResponse.getMessage()); // throw business exception
 		}
 
-		// TODO: set time out
-		// TODO: Implement retry mechanism
+		// TODO: enhancement "set time out"
+		// TODO: enhancement "implement retry mechanism"
 
 
-		// insert client data
+		// 2) insert client data
 		Client client1 = clientDao.insertClient(client);
 		if(client1 != null) {
 			responseStructure.setData(client1);
@@ -132,6 +129,4 @@ public class ClientService {
 		}
 		return responseStructure;
 	}
-
-
 }

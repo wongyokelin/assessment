@@ -14,44 +14,23 @@ import java.nio.charset.StandardCharsets;
 public class RequestLoggingFilter implements Filter {
 
     @Override
-    public void doFilter(
-            ServletRequest request,
-            ServletResponse response,
-            FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        HttpServletRequest req =
-                (HttpServletRequest) request;
+        HttpServletRequest req = (HttpServletRequest) request;
 
-        ContentCachingResponseWrapper wrappedResponse =
-                new ContentCachingResponseWrapper(
-                        (HttpServletResponse) response);
+        ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
         long startTime = System.currentTimeMillis();
 
-        log.info(
-                "Incoming Request => Method: {}, URI: {}",
-                req.getMethod(),
-                req.getRequestURI()
-        );
+        log.info("Incoming Request => Method: {}, URI: {}", req.getMethod(), req.getRequestURI());
 
         chain.doFilter(request, wrappedResponse);
 
-        long duration =
-                System.currentTimeMillis() - startTime;
+        long duration = System.currentTimeMillis() - startTime;
 
-        String responseBody =
-                new String(
-                        wrappedResponse.getContentAsByteArray(),
-                        StandardCharsets.UTF_8
-                );
+        String responseBody = new String(wrappedResponse.getContentAsByteArray(), StandardCharsets.UTF_8);
 
-        log.info(
-                "Outgoing Response => Status: {}, Duration: {} ms, Body: {}",
-                wrappedResponse.getStatus(),
-                duration,
-                responseBody
-        );
+        log.info("Outgoing Response => Status: {}, Duration: {} ms, Body: {}", wrappedResponse.getStatus(), duration, responseBody);
 
         wrappedResponse.copyBodyToResponse();
     }

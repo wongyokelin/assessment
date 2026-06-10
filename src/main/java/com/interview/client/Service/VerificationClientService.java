@@ -20,7 +20,6 @@ public class VerificationClientService {
     public VerificationResponse verifyClient(Client client) {
 
         VerificationRequest request = new VerificationRequest();
-
         request.setIcNumber(client.getIcNumber());
 
         log.info("Calling Verification API for IC={}", client.getIcNumber());
